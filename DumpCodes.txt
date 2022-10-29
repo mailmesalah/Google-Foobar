@@ -1,0 +1,486 @@
+//Generating the space for required matrices        
+        int[][] iMat = new int[stableCount][stableCount];
+        int[][] rMat = new int[m.length-stableCount][stableCount];
+        int[][] oMat = new int[stableCount][m.length-stableCount]; //Already 0 Matrix
+        int[][] qMat = new int[m.length-stableCount][m.length-stableCount];
+        
+        //Identity Matrix
+        for(int i=0;i<stableCount;++i){
+            iMat[i][i]=1;                
+        }
+
+
+
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.mycompany.google.task31;
+
+/**
+ *
+ * @author selyc
+ */
+
+public class Solution {
+    
+    public static void main(String[] arg){
+        
+        
+        /*
+        int[][] params={{0, 1, 0, 0, 0, 1}, {4, 0, 0, 3, 2, 0}, {0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0}};
+        int[] ret=Solution.solution(params);
+        
+        System.out.println("Question Matrix");
+        printMatrix(params);
+        
+        System.out.println("Answer");
+        printArray(ret);
+        
+        int[][] params=new int[][]{{0, 2, 1, 0, 0}, {0, 0, 0, 3, 4}, {0, 0, 0, 0, 0}, {0, 0, 0, 0,0}, {0, 0, 0, 0, 0}};
+        int[]ret=Solution.solution(params);
+        
+        System.out.println("Question Matrix");
+        printMatrix(params);
+        
+        System.out.println("Answer");
+        printArray(ret); */
+        
+        int[][] params=
+        {
+            {0, 86, 61, 189, 0, 18, 12, 33, 66, 39}, 
+            {0, 0, 2, 0, 0, 1, 0, 0, 0, 0}, 
+            {15, 187, 0, 0, 18, 23, 0, 0, 0, 0}, 
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+        };
+        int[] ret=Solution.solution(params);
+        
+        System.out.println("Question Matrix");
+        printMatrix(params);
+        
+        System.out.println("Answer");
+        printArray(ret);
+        
+    }
+        
+    
+    public static int[] solution(int[][] m) {
+        // Your code here                
+        
+        //Finding Number of Stable State
+        int[] sum= new int[10];         
+        int stableCount=0;
+        for(int i=0;i<m.length;++i){
+            for(int j=0;j<m[i].length;++j){
+                sum[i]+=m[i][j];
+            }
+            if(sum[i]==0){
+                ++stableCount;
+            }
+        }
+                        
+        int r=0;        
+        int c=0;
+        
+        //R Fraction Matrix        
+        Fraction[][] rFMat= new Fraction[m.length-stableCount][stableCount];
+        r=0;        
+        c=0;
+        for(int i=0;i<m.length;++i){
+            if(sum[i]>0){
+                for(int j=0;j<m[i].length;++j){
+                    if(sum[j]==0){
+                        rFMat[r][c]=new Fraction(m[i][j],sum[i]);
+                        ++c;                        
+                    }
+                }
+                c=0;
+                ++r;
+            }
+        }
+        
+        //Q Fraction Matrix
+        Fraction[][] qFMat= new Fraction[m.length-stableCount][m.length-stableCount];
+        r=0;        
+        c=0;
+        for(int i=0;i<m.length;++i){
+            if(sum[i]>0){
+                for(int j=0;j<m[i].length;++j){
+                    if(sum[j]>0){                        
+                        qFMat[r][c]= new Fraction(m[i][j],sum[i]);                        
+                        ++c;                        
+                    }
+                }
+                c=0;
+                ++r;
+            }
+        }
+        
+        //Identity Matrix
+        Fraction[][] iFMat= new Fraction[qFMat.length][qFMat[0].length];
+        for(int i=0;i<qFMat.length;++i){
+            for(int j=0; j<qFMat[0].length;++j){
+                if(i==j){
+                    iFMat[i][j]= new Fraction(1,1); 
+                }else{
+                    iFMat[i][j]= new Fraction(0,1); 
+                }
+            }
+        }
+        
+        System.out.println("I Matrix");
+        printFMatrix(iFMat);
+        System.out.println("R Matrix");
+        printFMatrix(rFMat);
+        System.out.println("Q Matrix");
+        printFMatrix(qFMat);
+        System.out.println("Identity Matrix");
+        printFMatrix(iFMat);        
+        
+        
+        //I-Q
+        Fraction[][] imqFMat= Fraction.matrixSubstract(iFMat, qFMat);
+        System.out.println("I-Q Matrix");
+        printFMatrix(imqFMat);
+                        
+        //matrix Inverse
+        Fraction[][] fFMat=Fraction.matrixInverse(imqFMat);                             
+        System.out.println("F Matrix");
+        printFMatrix(fFMat);
+        
+        Fraction[][] frFMat = Fraction.matrixMultiply(fFMat, rFMat);        
+        System.out.println("FR Matrix");
+        printFMatrix(frFMat);
+        
+        //Finding LCM
+        //Get All Denominators
+        int[] lArr = new int[frFMat[0].length];
+        for(int i=0;i<frFMat[0].length;++i){
+            lArr[i]=frFMat[0][i].getDenominator();
+            System.out.print(lArr[i]+" ");
+        }
+        
+        int lcm=leastcm(lArr);
+        System.out.println("LCM = "+lcm);
+        
+        int[] result = new int[lArr.length+1];
+        for(int i=0;i<frFMat[0].length;++i){
+            int n=frFMat[0][i].getNumerator();
+            int d=frFMat[0][i].getDenominator();
+            result[i]=n*(lcm/d);
+        }
+        result[result.length-1]=lcm;
+        
+                
+        return result;
+    }
+    
+    private static int leastcm(int a[]){
+        
+        //Find th largest number
+        int lcm=0;
+        for(int i=0;i<a.length;++i){
+            if(lcm<Math.abs(a[i])){
+                lcm=a[i];
+            }
+        }
+        while(true){
+            boolean match=true;
+            for(int i=0;i<a.length;++i){
+                if(lcm%a[i]!=0){
+                    lcm+=lcm;
+                    i=0;
+                }
+            }
+            if(true){
+                break;
+            }
+        }        
+        
+        return lcm;
+    }
+    
+    private static void printMatrix(int[][] x){
+        for(int i=0;i<x.length;++i){
+            
+            for(int j=0;j<x[i].length;++j){
+                System.out.print(x[i][j]+"    ");
+            }
+            System.out.println();
+        }
+    }
+    
+    private static void printFMatrix(Fraction[][] x){
+        for(int i=0;i<x.length;++i){
+            
+            for(int j=0;j<x[i].length;++j){
+                System.out.print(x[i][j].getNumerator()+"/"+x[i][j].getDenominator()+"   ");
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
+    
+    private static void printArray(int[] x){
+        for(int i=0;i<x.length;++i){
+            System.out.print(x[i]+"    ");           
+        }
+        System.out.println();
+    }
+    
+    static class Fraction{
+        private int numerator=0;
+        private int denominator=1;
+        
+        public Fraction(){
+            numerator=0;
+            denominator=1;
+        }
+        public Fraction(int n, int d){
+            numerator=n;
+            denominator=d;            
+            reduce();
+        }
+
+        public int getNumerator() {
+            return numerator;
+        }
+
+        public void setNumerator(int numberator) {
+            this.numerator = numberator;
+            reduce();
+        }
+
+        public int getDenominator() {
+            return denominator;
+        }
+
+        public void setDenominator(int denominator) {
+            this.denominator = denominator;
+            reduce();
+            
+        }
+        
+        private void reduce(){
+            //Fraction Reduction
+            if(numerator==0){
+                denominator=1;
+            }
+            int smallest=Math.abs(numerator)>Math.abs(denominator)?Math.abs(denominator):Math.abs(numerator);            
+            for(int i=2;i<=smallest;++i){
+                if(numerator%i==0 && denominator%i==0){
+                    numerator/=i;
+                    denominator/=i;
+                    i=2;
+                    smallest=numerator>denominator?denominator:numerator;
+                    smallest=smallest/2;
+                }
+            }
+            
+            //Update Sign
+            if(denominator<0){
+                numerator*=-1;
+                denominator*=-1;
+            }
+        }
+        
+        public static Fraction[][] matrixSubstract(Fraction[][] x, Fraction[][] y){
+            
+            Fraction[][] z= new Fraction[x.length][x[0].length];
+            
+            for(int i=0;i<x.length;++i){
+                for(int j=0;j<x[0].length;++j){                    
+                    z[i][j]= new Fraction(0,1);
+                    z[i][j].denominator=x[i][j].denominator*y[i][j].denominator;
+                    z[i][j].numerator=(x[i][j].numerator*y[i][j].denominator)-(y[i][j].numerator*x[i][j].denominator);
+                }
+            }
+            
+            return z;
+            
+        }
+        
+        public static Fraction[][] matrixMultiply(Fraction[][] x, Fraction[][] y){
+            
+            Fraction[][] z= new Fraction[x.length][y[0].length];
+            
+            for(int i=0;i<x.length;++i){                
+                for(int j=0;j<y[0].length;++j){
+                    z[i][j]=new Fraction(0,1);                    
+                    for(int k=0;k<x.length;++k){
+                        Fraction mul=Fraction.fracMultiply(x[i][k], y[k][j]);
+                        z[i][j]=Fraction.fracAdd(z[i][j], mul);                        
+                    }                    
+                }
+            }
+            
+            return z;
+            
+        }
+        
+        public static Fraction fracAdd(Fraction x, Fraction y){
+            
+            Fraction z= new Fraction();
+            
+            int xn=x.getNumerator();
+            int xd=x.getDenominator();
+            int yn=y.getNumerator();
+            int yd=y.getDenominator();
+            
+            int n= (xn*yd)+(yn*xd);
+            int d= xd*yd;
+            
+            z.setNumerator(n);
+            z.setDenominator(d);
+            z.reduce();
+            
+            return z;
+            
+        }
+        
+        public static Fraction fracSubtract(Fraction x, Fraction y){
+            
+            Fraction z= new Fraction();
+            
+            int xn=x.getNumerator();
+            int xd=x.getDenominator();
+            int yn=y.getNumerator();
+            int yd=y.getDenominator();
+            
+            int n= (xn*yd)-(yn*xd);
+            int d= xd*yd;
+            
+            z.setNumerator(n);
+            z.setDenominator(d);
+            z.reduce();
+            
+            return z;
+            
+        }
+        
+        public static Fraction fracMultiply(Fraction x, Fraction y){
+            
+            Fraction z= new Fraction();
+            z.setNumerator(x.getNumerator()*y.getNumerator());
+            z.setDenominator(x.getDenominator()*y.getDenominator());
+            
+            z.reduce();
+            return z;
+            
+        }
+        
+        public static Fraction fracInverseMultiply(Fraction x, Fraction y){
+            
+            Fraction z= new Fraction();
+            
+            if(x.getNumerator()==0 || y.getNumerator()==0){
+                z.setNumerator(0);
+                z.setDenominator(1);
+            }else{
+                z.setNumerator(x.getNumerator()*y.getDenominator());
+                z.setDenominator(x.getDenominator()*y.getNumerator());
+            }
+            
+            z.reduce();
+            return z;
+            
+        }    
+        
+        public static Fraction[][] matrixInverse(Fraction[][] x){            
+            
+            //Determinant
+            Fraction determinant= new Fraction();
+            //Step 1: Matrix of Minors & Step 2: Matrix of Cofactors
+            Fraction[][] minorCo = new Fraction[x.length][x.length];
+            if(x.length==2){//For 2x2 Matrix                
+                minorCo[0][0]= new Fraction(x[1][1].getNumerator(), x[1][1].getDenominator());
+                minorCo[0][1]= new Fraction(x[1][0].getNumerator()*-1, x[1][0].getDenominator());
+                minorCo[1][0]= new Fraction(x[0][1].getNumerator()*-1, x[0][1].getDenominator());
+                minorCo[1][1]= new Fraction(x[0][0].getNumerator(), x[0][0].getDenominator());
+                //determinant for 2x2
+                determinant= Fraction.fracSubtract(Fraction.fracMultiply(minorCo[0][0], minorCo[1][1]), Fraction.fracMultiply(minorCo[0][1], minorCo[1][0]));                 
+            }else{
+                for(int i=0;i<x.length;++i){
+                    for(int j=0;j<x.length;++j){                        
+                        minorCo[i][j]=Fraction.findDeterminant(Fraction.getExMatrix(x, i, j));
+                        int sign=(int)Math.pow(-1,i+j);
+                        minorCo[i][j].setNumerator(minorCo[i][j].getNumerator()*sign);
+                        if(i==0){
+                           determinant=Fraction.fracAdd(determinant, minorCo[i][j]);
+                        }
+                    }
+                }
+            }
+            
+            //Step 3: Adjugate (also called Adjoint)
+            Fraction[][] adj = new Fraction[x.length][x.length];
+            for(int i=0;i<x.length;++i){
+                for(int j=0;j<x.length;++j){
+                    adj[i][j]=minorCo[j][i];
+                }
+            }
+            
+            //Step 4: Multiply by 1/Determinant
+            Fraction[][] inv = new Fraction[x.length][x.length];
+            int n=determinant.getNumerator();
+            int d=determinant.getDenominator();
+            Fraction indet= new Fraction(d,n);
+            for(int i=0;i<x.length;++i){
+                for(int j=0;j<x.length;++j){
+                    inv[i][j]=Fraction.fracMultiply(indet, adj[i][j]);
+                }
+            }
+            
+            return inv;
+            
+        }
+        
+        public static Fraction findDeterminant(Fraction[][] x){
+            
+            if(x.length==2){
+                Fraction ad=Fraction.fracMultiply(x[0][0],x[1][1]);
+                Fraction bc=Fraction.fracMultiply(x[1][0],x[0][1]);
+                return Fraction.fracSubtract(ad, bc);
+            }else{                
+                for(int i=0;i<x.length;++i){
+                    for(int j=0;j<x.length;++j){
+                        return Fraction.fracMultiply(x[i][j],Fraction.findDeterminant(Fraction.getExMatrix(x, i, j)));
+                    }
+                }
+            }
+            
+            return null;
+        }
+        
+        public static Fraction[][] getExMatrix(Fraction x[][], int ro, int col){
+            Fraction res[][]= new Fraction[x.length-1][x.length-1];
+            int ii=0;
+            int jj=0;
+            for(int i=0;i<x.length;++i){
+                if(i!=ro){
+                    for(int j=0;j<x.length;++j){
+                        if(j!=col){
+                            int n=x[i][j].getNumerator();
+                            int d=x[i][j].getDenominator();
+                            res[ii][jj]=new Fraction(n,d);
+                            ++jj;
+                        }
+                    }
+                    jj=0;
+                    ++ii;
+                }
+            }
+            return res;
+        }
+        
+    }
+    
+    
+}
